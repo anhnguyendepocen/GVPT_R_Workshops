@@ -1,0 +1,973 @@
+---
+title: "Data Management in R"
+subtitle: Political Methodology R Workshops (Workshop 2)
+author: |
+      | Eric Dunford
+      | Department of Government and Politics
+      | University of Maryland, College Park
+date: "Fall 2016"
+output: 
+    html_document:
+      toc: true
+---
+
+```{r setup, include=FALSE}
+# We'll discuss R Markdown below and really go into it during the 4th workshop when covering presentation. For now, just note that these are "code chunks" where we can render R code. Here we are setting some simple options. 
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage 
+
+# Quick Review: `R Basics`  Workshop
+
+Last week we covered:
+
+- Objects and Classes
+- Packages 
+- Importing Data 
+- Simple Descriptive Statistics and Graphics
+
+For the complete slides, please go to the following [link](http://rpubs.com/dunforde/Rbasics).
+
+## Wait, what are objects again?
+R is an _object oriented_ statistical programming language, which means we assign specific pieces of information (say a dataset) a specific textual representation (the name "data"). This allows us to recall and re-use information for future analysis. 
+
+We can _assign_ values to an object with one of the three following commands:
+
+- `<-`
+- `=`
+- `assign()`
+
+For example,
+```{r}
+x1 <- 3 
+x2 = 3
+assign("x3",3)
+c(x1, x2, x3) 
+```
+
+## Why are we always talking about class?
+Objects have specific classes -- that is, objects have different properties given what information is assigned to it. When we assign a dataset to an object `x`, the `x` will have the class `data.frame`. This tells us 
+
+a. how the data is organized, 
+b. how to access the information within the object (because we know something about its structure), 
+c. what functions the object will work with. 
+
+For example, say you have a function that only take `data.frame` objects as an argument. The function will return an error if you try to read in a list. So understanding the fundamentals of classes is important for problem-solving.
+
+> ! For a complete list of all class and data types in R, go to the following [link](https://www.tutorialspoint.com/r/r_data_types.htm)!
+
+For an applied example consider the following. Here we are going to create two vectors, one that is composed of 4 string values, and one that is composed of 4 integers. We are then going to combine them into a data frame using the `data.frame()` function. We are then going to examine the objects `class`, `structure`, and then `print` it's output. 
+```{r}
+# Remember: c() stands for concatenate, which means link together in a chain or
+# a series
+
+x <- c("a","b","c","d") 
+y <- 1:4
+
+# Create a Data Frame from our two equal in length vect
+my_data = data.frame(x,y)
+
+class(my_data)
+str(my_data)
+my_data
+```
+
+## Objects have Structure?
+
+Different classes have different structures. What we mean by this is that the data is _housed_ differently depending on the class of an object. What this means for us is that **how we _get at_ specific pieces of data within an object differs given that objects structure.** 
+
+```{r}
+
+# Consider a vector, data.frame, and list.
+vector <- c(1,2,3,4,5)
+data_frame <- data.frame(variable1 = 1:4,
+                         variable2 = c(5,6,.3,99))
+List <- list(vector,data_frame)
+
+# we can access bits and pieces of a data structure by using "brackets" -- Think
+# of it like this, we are pointing to specific locations within the data and
+# saying give me just that piece. To point in the right place, we need to know
+# something about where in the house the data is.
+
+# *** Accessing data in a vector ***
+
+        # Only one "dimension"
+        length(vector) # We can access one of the five values
+        str(vector)
+        vector[1]
+        vector[5]
+    
+# *** Accessing data in a data.frame ***
+        
+        # More complex, two dimensions
+        dim(data_frame) # 4 rows, 2 columns
+        str(data_frame) 
+        
+        data_frame[1,2] # row 1, column 2
+        data_frame[4,] # All of row 4
+        data_frame[,2] # all of column 2
+        
+        # We can also use the call sign $ to access specific variables in a
+        # data. frame
+        data_frame$variable1
+
+# *** Accessing data in a list ***
+        
+        # Lists are "non-relational" meaning you can store a lot of differnt 
+        # kinds of data that are of different lengths and composition. Just look
+        # at our list. We loaded both a vector and a data.frame into the SAME 
+        # OBJECT. Wow! Lists are what most package output will come as.
+        
+        length(List) # two "sets" of things in this list
+        str(List) # we can see that we have a vector and a data frame
+        
+        List[2] # Let's access the data.frame in the list
+        class(List[2])
+        
+        # Say we just wanted to retrieve the data.frame. Well this is where the 
+        # bracket logic can get a little confusing because we can "go deeper"
+        # into the objects structure.
+        List[[2]]
+      
+        class(List[[2]]) # See we are drawing out the data frame that is inside the list
+        
+        # Now let's grab the fourth row of the data.frame that's in the list
+        List[[2]][4,]
+        List[[2]][,1] # or the first column
+```
+
+## Importing Data?
+
+Importing data is straightforward, but not all the **base packages** in R can handle every data source. To load in different types of data, you'll need to utilize different packages. Last week we reviewed the following packages: 
+
+- `foreign` -- import sas, spss, stata (version 12 <=)
+- `readstata13` -- importing stata (version 13 >=)
+- `XLconnect` -- importing excel worksheets. 
+
+Reading in `Rdata` or `.csv` is built into R's base functionality, which makes it the "easiest" data formats to use. 
+
+Remember: to access a data frame, you first have to tell `R` where that data is located. We can do this one of two ways: 
+
+1. set a working directory with `setwd("/Users/Your_computer/Desktop")
+2. specify the path when loading the data, e.g., `"/Users/Your_computer/Desktop/data.csv"`
+
+For example, let's write data to our desktop and then read it back in.
+```{r}
+path <- "/Users/edunford/Desktop/data.csv"
+write.csv(data_frame,file=path,row.names = F) 
+new_data <- read.csv(file=path)
+new_data
+```
+
+## Dropping Objects
+
+What is some thing that we should have covered last week but didn't? Oh **dropping objects**, of course! We reviewed how to _create_ an object, but what if I want to get rid of it? That's easy: use the command `rm()` to remove all objects that you don't want.
+
+```{r}
+ls() # What are all the objects that we've created?
+x <- 3
+x # remember our vector
+# Let's drop it!
+rm(x)
+ls() # Gone!
+
+# What if I want to completely clear the workspace? Do the following:
+rm(list=ls(all=T))
+ls() # if only starting from scratch was this easy in real life!
+```
+
+--------------------------------------
+
+
+# Basic Data Manipulations
+Today we are going to cover all aspects of data manipulation and management. Now that we understand what objects _are_ and how to access the information _within_ them, we are on good ground to understand how to craft an object into something that is analytically useful. We'll focus primarily on `data.frames` as this is the dominant data structure used in political science research. 
+
+Here we are going to use a dataset that is inherent in R, called `sleep`. These data show the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients.
+
+```{r}
+data <- sleep
+str(data)
+```
+
+
+## Variables
+
+### Creating Variables
+Recall that we can access a variables contents using the call sign `$`. We can also use this same call logic to create a new variable. 
+```{r}
+data$extra # varible regarding extra-sleep
+
+data$Add_2 <- data$extra + 2
+head(data)
+```
+
+We can also use other aspects of a data frame's structure to the same end.
+```{r}
+data[,5] <- 1 # As Column 4, load the value 1 for all obs.
+head(data) # Assign arbitrary name
+```
+
+Or we can call the columns name.
+```{r}
+data[,"V4"] <- 41:60
+head(data)
+```
+
+The creation of any variable follows this same logic _as long as the vector being inserted is of the **correct length**_.
+```{r}
+nrow(data)
+data[,"New_Variable"] <- rnorm(n=20,mean = 40,sd=5)
+head(data) # Works! 
+```
+
+```{r,eval=F}
+data[,"New_Variable"] <- rnorm(n=21,mean = 40,sd=5) # Breaks
+data[,"New_Variable"] <- rnorm(n=19,mean = 40,sd=5) # Breaks
+```
+
+Note that all transformation of any variable follow the same logic. 
+```{r}
+data$NV_ln <- log(data$New_Variable) # Natural Log
+data$NV_ln10 <- log10(data$New_Variable) # Log Base 10
+data$NV_e <- exp(data$New_Variable) # Exponentiate
+data$NV_sqrt <- sqrt(data$New_Variable) # Square Root
+data$NV_abs <- abs(data$New_Variable) # Absolute Value
+head(data)
+```
+
+### Categorical Variables 
+As we discussed last week, there are two class types for strings in R (again, a "string" is anything contained within quotes): `factors` and `characters`. Factors are useful when creating categorical variables as they retain `levels`, which are numeric place holders. As long as a character variable is a factor, it can be used as a categorical variable 
+
+In the sleep data, the `groups` variable is already a factor.
+```{r}
+data$group
+```
+
+To create a categorical, variable, we just need to create our own factor. 
+```{r}
+vec <- rep(c("a","b","c","d","e"),4)  # repeating the vector 4 times
+vec <- factor(vec)
+vec
+data$my_cat <- vec
+# by coercing the value into a numeric, we can retrieve the underlying levels.
+data$my_cat
+as.numeric(data$my_cat) 
+```
+
+### Ordinal Variables (`ifelse()` conditionals) 
+Often we need to chop up a distribution into an ordered variable. This is straightforward when using the `ifelse()` conditional statement. Essentially, we are saying: if the variable meets this criteria, code it as this; else do this. 
+
+For an example, let's break the `extra` variable up into a dichotomous indicator.
+```{r}
+mean(data$extra)
+
+data$extra_dich <- ifelse(data$extra>=mean(data$extra),1,0)
+data[,c("extra","extra_dich")]
+```
+
+To build more complex ordinal values, we can expand this process by linking a bunch of `ifelse()` statements. 
+```{r}
+sum <- summary(data$extra)
+cat(sum[2],sum[3],sum[5]) # 1st Q, median, 3rd Q
+
+data$extra_ord <- ifelse(data$extra>=sum[2] & data$extra<sum[3],1,
+                     ifelse(data$extra>=sum[3] & data$extra<sum[4],2,
+                            ifelse(data$extra>=sum[4],3,0)))
+data[,c("extra","extra_dich","extra_ord")]
+```
+
+### Dropping Variables
+We can also reverse this process by loading `NULL` to any variable. This in effect "drops"" the variable. 
+```{r}
+data$Add_2 <- NULL
+head(data) # Gone!
+```
+
+Or use **negative values in the brackets** to specify variables you'd like to drop.
+```{r}
+head(data[,c(-3,-4,-5,-6,-7)])
+
+# Or a quicker way would be to do the following...
+head(data[,c(3:7)*-1])
+
+# as we know that
+c(3:7)*-1
+```
+
+We can also **subset out** a variable. 
+```{r}
+new_data <- data[,c(1,2)]
+head(new_data) # only selected two variables and made a new object. 
+```
+
+
+### Renaming Variables 
+Inevitably, you we'll need to rename variables. Doing so is straightforward with the `colnames()` function.
+
+```{r}
+colnames(data)
+
+# colnames behaves like any vector, and as such, we can access the information
+# as we would any vector
+colnames(data)[4]
+colnames(data)[4:5]
+
+# Renaming a variable is as easy as inserting a new value in the data structure.
+colnames(data)[4] <- "constant"
+colnames(data)
+
+colnames(data)[1:5] <- c("var1","var2","var3","var4","var5")
+colnames(data)
+head(data)
+```
+
+
+## Subsetting Data
+As noted above, it's straightforward to subset data given what we know about an object's structure. But there are also a few functions that make our life easier. 
+
+```{r}
+# The many ways to subset
+data <- sleep
+
+# Let's subset the data so that we only have group 2. There are many ways to do
+# this, let's explore a few.
+
+      # (1) Use the what we know about boolean operators from last week. 
+      data[data$group==2,]
+      
+            # More complex?
+            data[data$group==2 & data$extra>=4,]
+            
+            # Subset and only give me the first column
+            data[data$group==2 & data$extra>=4,1]
+      
+      # (2) Use the subset function which is a base function in R
+      subset(data, subset = group==2)
+              
+            # More complex?
+            subset(data, group==2 & extra>=4)
+            
+            # Subset and only give me the first column
+            subset(data, group==2 & extra>=4,select = extra)
+            
+            # Or more
+            subset(data, group==2 & extra>=4,select = c(extra,group))
+```
+
+## Merging Data
+
+Merging data is a _must_ in quantitative political analysis by bringing various datasets together we can enrich our analysis. But this isn't always straightforward. Sometimes observations can be dropped if one is not vigilant of the dimensions of each data frame being input. 
+
+**The Basics**
+```{r}
+# Let's create two example data frames. Note that rep() is a function to repeat
+# a sequence a specific number of times.
+
+countries <- rep(c("China","Russia","US","Benin"),2) 
+years <- c(rep(1999,4),rep(2000,4))
+
+data1 <- data.frame(country=countries,
+                   year=years,
+                   repress = c(1,2,4,3,2,3,4,1),stringsAsFactors = F)
+
+data2 <- data.frame(country=countries,
+                   year=years,
+                   GDPpc= round(runif(8,2e3,20e3),3),stringsAsFactors = F)
+
+head(data1);head(data2)
+
+
+# Merging the datasets: here we'll merge the data utilizing a unqiue identifier
+# that is common across the two datasets
+
+        merge(data1,data2,by="country") # Just countries
+        merge(data1,data2,by=c("country","year")) # country-years
+```
+
+**Inevitable Issues**
+```{r}
+# Assume that we are merging two data frames that do not contain the exact same
+# units.
+
+dataA = data1[data1$year==1999,] # subset the working data
+dataB = data2[data2$year==1999,] # subset the working data
+dataA[1,"country"] <- "Belize"
+dataB[2,"country"] <- "Turkey"
+
+dataA;dataB # Here we have slighly different countries in each DF
+
+
+merge(dataA,dataB,by=c("country","year")) # Ah! Only a few merged?
+
+# We need to specify to the merge function that we want all observations back
+merge(dataA,dataB,by=c("country","year"),all=T)
+
+# We can preference a particular data set when doing this
+merge(dataA,dataB,by=c("country","year"),all.x=T)
+merge(dataA,dataB,by=c("country","year"),all.y=T)
+```
+
+**When you have a variable with the same name**
+
+Sometimes we have a variable that is named the same in both datasets. R has a built in convention for dealing with these issues. It will automatically assign a temporary naming convention to deal with the duplicates. 
+```{r}
+dataA$GDPpc <- round(runif(4,2e3,20e3),3) # Create a similar var
+merge(dataA,dataB,by=c("country","year"),all=T)
+```
+
+--------------------------------------
+
+
+# Loops
+As one quickly notes, doing any task in R can become redundant. Loops and functions can dramatically increase our workflow when a task is _systematic and repeatable_.  
+
+As a motivating example, say we wanted to calculate the **group mean** of the `extra` variable for each group in our `sleep` data, and then save the output in a vector
+
+```{r}
+data <- sleep
+# Here we are going to paste the word "Group" for each group to create group
+# names
+data$group <- paste0("Group",data$group) 
+data$group
+
+# To do this, we'd need to subset by each group and then calculate the mean.
+sub <- data[data$group=="Group1",]
+mu1 <- mean(sub$extra)
+
+sub <- data[data$group=="Group2",]
+mu2 <- mean(sub$extra)
+
+group_means <- c(mu1,mu2) # combine
+group_means
+```
+
+This works when there are only a few groups, but it would become quite the undertaking as the number of groups increased. Here is where **loops** can make one's life easier! By "**looping through**" all the respective groups, we can automate this process so that it goes a lot quicker. 
+
+A loop essentially works like this:
+
+1. Specify a length of some thing you want to loop through. In our case, it's the number of groups.
+2. Set the code up so that every iteration only performs a manipulation on a single subset at a time.
+3. Save the contents of each iteration in a new object that won't be overwritten. Here we want to think in terms of "stacking" results or concatenating them. 
+
+In practice...
+```{r}
+# (1) Specify the length
+no.of.groups = unique(data$group) # only unique entries
+no.of.groups
+1:length(no.of.groups) 
+
+# (2) Make the code iterable 
+sub = data[data$group==no.of.groups[1],]
+# Here, just by changing where we are in the vector "no.of.groups", we can draw 
+# out a unique subset
+
+# (3) Save the contents
+container = c() # create an empty container that we can append to.
+# here we concatenate the mean with the empty object "container", which will
+# save each additional value. 
+
+        # For example
+            container = c()
+            container <- c(container,1.2) 
+            container <- c(container,6.7)
+            container <- c(container,9.8)
+            container
+```
+
+Now combine all these elements if a special base function called `for(){}` -- note that all the code goes in-between the brackets. Here we need to establish an arbitrary iterator, which I'll call `i` in the example below. `i` will take the value of each entry in the vector `1:length(no.of.groups)`, e.g. `i=1` then `i=2`, and so on given how many groups we have.
+```{r}
+container = c() # Empty Container
+for ( i in 1:length(no.of.groups) ){
+  sub = data[data$group==no.of.groups[i],] 
+  mu <- mean(sub$extra)
+  container <- c(container,mu) 
+}
+container
+```
+
+To really illustrate this point, let's make the data big! Note that `letters` is a vector of all the letters in the Latin alphabet. This vector is built into R. Also, check out just how arbitrary the iterator is!
+```{r}
+N = 1000 # Number of Observations
+big_data = data.frame(group = rep(letters[1:10],N/10), # ten groups total
+                      id = round(runif(N,1,100)),
+                      value = rnorm(N,6,4),stringsAsFactors = F)
+head(big_data)
+
+# Now, let's construct the loop. 
+no.of.groups = unique(big_data$group)
+container1 = c() # Empty Container
+container2 = c() # Empty Container
+for ( super_arbitrary_iterator in 1:length(no.of.groups) ){
+  sub = big_data[big_data$group==no.of.groups[super_arbitrary_iterator],] 
+  mu <- mean(sub$value)
+  
+  # Let's have two containers. One that appends in a list, the other that stacks
+  # values in a matrix using "rbind()", which stands for row bind.
+  container1 <- c(container1,mu) 
+  container2 <- rbind(container2,mu)
+}
+container1
+container2
+```
+
+Oh the possibilities! 
+
+--------------------------------------
+
+# Functions
+If you'll recall, a `package` is really a bag of functions that someone threw together to perform specific tasks. More often than not, we have specific tasks that we have to implement _all the time_. Building a function for these tasks can really make life easier, and often it makes one's work more reproducible and transparent. **The secret to a good function is that the task can be generalized.** That is, across many different data contexts, it can be applied. 
+
+For example, consider calculating the mean for any variable. 
+```{r}
+var <- c(4,7,90,.3)
+(var[1] + var[2] + var[3] + var[4])/length(var) # Mean by hand!
+
+# Just imagine if we had to spell this out every time we wanted know the mean!
+# Luckily, there is a nice built-in function that does this for us.
+mean(var)
+```
+
+Let's go through the process of **building our own functions in `R`**. In basic terms, a function is a specific set of arguments that perform a specific task.
+
+Let's build a simple function that **adds two values**. Here the function will have two arguments, or put differently, two _values_ that need to be entered for the function to perform. As you'll note, this looks a lot like the set up for a loop!
+
+```{r}
+add_me <- function( argument1, argument2 ){
+  value <- argument1 + argument2
+  return(value) # "return" means "send this back once the function is done"
+}
+
+add_me(2,3)
+add_me(100,123)
+add_me(60,3^4)
+
+
+# We can set "default" values for an argument, so if there is no inputs, the
+# function will still run.
+add_me <- function( argument1=1, argument2=2 ){
+  value <- argument1 + argument2
+  return(value) 
+}
+add_me()
+add_me(4,5)
+```
+
+
+Now, let's build a function for our **group mean loop** that we constructed in the last section. The arguments we would need are straight forward. We need the `data`, the name of the `group` column, and the name of the `value` column.
+
+```{r}
+group_mean <- function ( data, group.var, value.var ){
+  
+  no.of.groups = unique(data[,group.var]) 
+  # Does anyone know why I am accessing the data this way?
+  
+  container = c() # Empty Container
+  
+  for ( super_arbitrary_iterator in 1:length(no.of.groups) ){
+    sub = data[data[,group.var]==no.of.groups[super_arbitrary_iterator],] 
+    mu <- mean(sub[,value.var])
+    container <- rbind(container,mu) # return as matrix
+  }
+  
+  # Lastly, let's also enter in the group names as row names
+  rownames(container) <- no.of.groups
+  
+  return(container)
+}
+
+group_mean(big_data,group.var = "group",value.var = "value")
+
+# Does it travel across different data contexts?
+
+# Recall the fake country data?
+head(data1)
+group_mean(data1,group.var = "country",value.var = "repress") # beautiful!
+```
+
+Clearly, when done well functions and loops can make one's life easier. But they are also more than that. They make `R` unique, customizable, transparent, and flexible. Instead of saying, "I can't wait until someone builds software that does [insert specific thing here]", we can just build it ourselves! This is amazingly liberating. 
+
+# Vectorization
+Vectorization is a faster way to manipulate data sources in `R`. Technically, we do it all the time without realizing. 
+
+For example, here we are multiplying the value `3` across all values of `x` simultaneously.
+```{r}
+x <- 1:10
+x*3
+```
+
+When we talk about vectorization, we are talking about the **`apply` family** of functions. Think of `apply` as a loop. There is some value that the function can iterate across and it does so across all values simultaneously. This often (not always) results in faster code. 
+
+What is nice about `apply` functions is that you can write a quick function, and then apply it to all parts of your data without having to construct an iterative loop. 
+
+The "family" includes:
+
+- `apply` -- basic, great for matrix and data frame manipulations. Systematically moves across rows or columns and "applies" some function. 
+- `lapply` -- apply a function across a list, does something to each aspect of the list, then returns a list.
+- `sapply` -- simpler than `lapply`. Reads in a list and returns a vector. 
+- `tapply` -- apply a function to data in "cells". 
+- `by` -- a more complex `tapply` that allows one to move across a data.frame "by" subgroups.
+- and more! `mapply`, `eapply`, `vapply`
+
+Using the `iris` data from last week, let's review a few of these functions.
+```{r}
+head(iris)
+```
+
+### `apply`
+
+```{r}
+# apply() has two main arguments, making it incredibly easy to use. 
+# X = data
+# MARGIN = 1 means "move across rows"
+# MARGIN = 2 means "move across columns"
+# FUN = your function.
+
+# Using only the numeric values of the iris data...
+data <- iris[,1:4] 
+
+# Lets find the mean of each row.
+apply(data,MARGIN = 1,mean)
+
+# Now let's find the mean of each column
+apply(data,MARGIN = 2,mean)
+```
+
+This can be incredibly useful and powerful, because we can specify any function to perform the task we need -- as long as it works on the data at hand. 
+
+### `sapply`
+```{r}
+sapply(data,FUN = sd)
+```
+
+### `by`
+```{r}
+by(iris[,1:4],INDICES = iris$Species,FUN = colMeans)
+```
+
+### `lapply`
+```{r}
+L <- list(cats = 1:10, dogs = 11:20)
+L
+lapply(L,FUN = mean)
+```
+
+For a really great walk through on the apply family, see the [swirl package](http://swirlstats.com/).
+
+# The `dplyr` Approach
+
+`dplyr` was designed to be a "grammar of data manipulation" -- and it was quite successful at doing just that! With just a few simple combinations, one can manipulate data with ease. `dplyr` gets us:
+
+- a clear syntax for data manipulation: "verbs" that do what you'd expect, i.e. the command matches the name.
+- efficiency: the back-end of the functions are optimized in c++. 
+
+```{r,warning=F,error=F,message=F}
+require(dplyr)
+```
+
+
+## The Pipe
+When we load dplyr, we activate the "pipe" (originally from the package `magrittr`). In simple terms, the pipe "passes" tasks from one function to the next, making it unnecessary to create a bunch of useless objects. This results in code that is easier to write and read -- which is always great!
+
+Let's consider running the same command three different ways: here we will take the standard deviation of a variable and then round it.
+
+```{r}
+x <- rnorm(100,3,4) # generate a random variable
+
+# (1) go object by object
+x <- rnorm(100,3,4) # generate a random variable
+x_sd <- sd(x)
+x_sd_rounded <- round(x_sd,2)
+x_sd_rounded
+
+# (2) nest the functions within each other
+round(sd(rnorm(100,3,4)),2)
+
+# (3) pipe it 
+rnorm(100,3,4) %>% sd(.) %>% round(.,2)
+```
+
+Again, the pipe (`%>%`) “passes” tasks between functions seamlessly, and it makes your code easier to read and debug. We can direct the data to a specific spot in a function using the pointer "`.`".
+
+As we'll see, the pipe is a game changer, and when employed with the `dplyr` lexicon, you can really get stuff done. 
+
+## `dplyr` "verbs"
+
+The goal of the package is to have very simple verbs that do exactly what it sounds like they do. The language offers clarity to data manipulation, which makes it easy to translate what one has in his/her head into _R_eality!
+
+We'll review a few (and some of the most useful) of these functions:
+
+- filter() (and slice())
+- select() (and rename())
+- distinct()
+- mutate() (and transmute())
+- summarise()
+- sample_n() and sample_frac()
+- And more! Just check out the documentation. 
+
+Also, let's bring in some real **UCDP data** for the applied examples.
+```{r,cache=TRUE}
+ucdp.loc <- "http://ucdp.uu.se/downloads/ucdpprio/ucdp-prio-acd-4-2016.csv"
+ucdp <- read.csv(url(ucdp.loc),stringsAsFactors = F)
+dim(ucdp) # dimensions
+str(ucdp)
+```
+
+
+### `filter`
+Much like subset, you can filter allows you to select specific subsets of the data
+```{r}
+filter(ucdp,Location=="Afghanistan" & StartDate=="2015-02-09")
+```
+
+### `select`
+Select specific columns
+```{r}
+# Select specific columns
+select(ucdp[1:3,],Location,SideA,Year)
+
+# You can even employ ranges!
+select(ucdp[1:2,],ConflictId:SideA)
+
+# Or subset out columns you DON'T want (using the -)
+select(ucdp[1:2,],-(ConflictId:GWNoA))
+
+# Or select a column and RENAME IT simultaneously
+select(ucdp[1:2,],Country=Location,Year,SideA)
+```
+
+### `rename`
+As the name would imply, rename variables
+```{r}
+rename(ucdp[1:2,],country=Location,ID=ConflictId,government=SideA)
+```
+
+### `distinct`
+The same as `unique`. Here we'll examine the distinct locations for the first 100 observations. 
+```{r}
+select(ucdp[1:100,],Location) %>% distinct(.)
+
+# or combinations: distinct locations and distinct start-dates of conflicts
+select(ucdp[1:100,],Location,StartDate) %>% distinct(.)
+```
+
+### `mutate`
+Create a new variable on the fly -- this is similar to a function called `transform` which is in base `R`. However, `mutate` allows us to utilize columns we _just_ created. 
+
+Below we are going to use the start date and create a variable called "start_year" and then subtract it by the current year to get a "duration" count.
+```{r}
+dd <- mutate(ucdp, 
+             start_year = as.numeric(format.Date(StartDate,"%Y")),
+             duration = Year - start_year)
+dd[1:5,c("Location","Year","duration")]
+```
+
+If you wish to _only_ retain the columns you created, use `transmute`.
+```{r}
+dd2  <- transmute(ucdp, 
+               start_year = as.numeric(format.Date(StartDate,"%Y")),
+               duration = Year - start_year)
+head(dd2)
+```
+
+### `summarize`
+Allows you to quickly summarize the data by whatever parameters you want and then prints it as a single row. This function can be useful for data exploration. 
+```{r}
+# Using the duration variable we just created to find the average duration of a 
+# conflict across the data and the standard deviation.
+summarize(dd,ave_duration = mean(duration),sd_duration= sd(duration))
+```
+
+### `sample_n` and `sample_frac`
+Allows you to randomly sample a specific number of rows (`sample_n`) or a specific proportion of the data (`sample_frac`)
+```{r}
+ucdp %>% select(.,Location,Year,SideA) %>% sample_n(.,4)
+
+ucdp %>% select(.,Location,Year,SideA) %>% sample_frac(.,.002)
+```
+
+
+### `group_by`
+This is a gem of a function. Group the data by a specific variable and then perform specific tasks.
+```{r}
+# Again using our duration variable...
+dd %>% group_by(.,Location) %>% 
+  summarize(.,total_years = n(),
+            ave_dur = round(mean(duration)),
+            # n_distinct == length(unique(.))
+            no_conflicts = n_distinct(StartDate)) %>% 
+  sample_n(.,5) # Randomly sample
+```
+
+The above demonstrates how one can employ powerful manipulations of the data rather succinctly. Here we now know the average duration in a country, the total number of conflict years (i.e. how many years the country is in the data), and the total number of unique conflicts.
+
+Finally, the `tbl_df` is a useful print function when you don't have a lot of room to display a dataset.
+```{r}
+tbl_df(ucdp)
+```
+
+
+# Advanced Data Manipulations
+
+## Lags
+The need to lag a variable is a common in political science analysis, but the task is not always straightforward in R. Consider the following data: if we use the`lag()` feature, we get the desired result, but not in a way that takes into account the groupings in the data.
+```{r}
+data <- data.frame(country=c(rep("A",10),rep("B",10)),
+                   year=rep(1995:2004,2),
+                   v1=runif(20,0,10),stringsAsFactors = F)
+
+data$lag1 <- lag(data$v1,1) # Lag
+
+# Country A's values "bleed into" Country B's...no good.
+data
+```
+
+To get around this, we need to lag _by subgroup_.
+
+First, we can utilize a **loop** to deal with the sub-grouping issue.
+```{r}
+groups = unique(data$country)
+for (i in 1:length(groups) ){
+  lagged_value = lag(data[data$country==groups[i],"v1"])
+  data[data$country==groups[i],"lag2"] <- lagged_value
+}
+data
+```
+
+Which worked! But that was a lot of code for something that should be easier. The **`dplyr` approach** offers it's own solution, and it's quick and clean. Here we are first grouping the data by country, then creating a new variable which is a one-year lag (also, we are ordering the data by year).
+```{r}
+data <- data %>%
+  group_by(country) %>%
+  mutate(lag3 = lag(v1, order_by=year))
+data 
+```
+
+The most straightforward way to deal with any data manipulation is to really think through what is going on. Note that we can lag to any depth using `lag(variable,k)`, where k is the number of units one wishes to lag by. 
+
+## Time Since An Event (Duration Counters)
+In event history analysis, a duration variable counts the time since an event last occurred. This is also central to calculating a cubic polynomial to deal with time specific effects in a glm. 
+
+For an example, consider the following data. Here we have a country-year, with a 1 denoting the occurrence of some event. 
+```{r}
+event_data <- data.frame(country="Nigeria",
+                         year=1999:2010,
+                         event = c(1,0,0,0,1,0,0,0,0,
+                                   1,0,0))
+event_data 
+```
+
+To create a duration counter, we can do one of three things: run a loop, use dplyr, use a duration package. My preference is for the dplyr approach, as it fits in the same framework as most other manipulations, and it only requires a few lines of code, but I will show all three.
+
+(1) using a **Loop** 
+```{r}
+j = 0
+event_data$time_since <- 0
+for(i in 1:nrow(event_data)){
+  if(event_data$event[i]==1){
+    j <- 0
+    event_data$time_since[i] <- j
+  }else{
+    j <- j + 1
+    event_data$time_since[i] <- j
+  }
+}
+event_data
+```
+
+(2) **`dplyr` approach**: here we are grouping the data by country (assuming that we have multiple countries), and a number unique variable that we are calling "spell_id", which creates unique periods for each spell, then we are counting up the number of rows for each spell and subtracting by one (to exclude the initiation period); finally, we are dropping our unique ID variable and ungrouping the data.
+```{r}
+event_data2 <- event_data %>% 
+  group_by(country, spell_id = cumsum(event == 1)) %>% 
+  mutate(time_since2 = row_number()-1) %>% 
+  select(-spell_id) %>% ungroup(.)
+event_data2
+```
+
+(3) Use a survival analysis **package**: there are a number of duration modeling packages that will also perform this task for you. One of the better one's out there is called, `spduration`. 
+```{r,warning=F,error=F}
+require(spduration)
+event_data3 <- add_duration(event_data,
+                            y="event",
+                            unitID="country",
+                            tID="year",
+                            freq="year")
+
+# Clean so that it doesn't count the initiation period
+event_data3[event_data3$event==1,"duration"] <- 0 
+event_data3[,c(1:4,11)]
+```
+
+## Expansions and Contractions
+Sometimes we need to **expand episodal data** out so that we have an observation for each year. Note that more often than not, this is unwise to do, as we are making an assumption that the indicator we wish to expand maps equally onto all temporal units that we are expanding by --- but if you do need to do it, here is how we'd get it done.
+
+```{r}
+data <- data.frame(country = c("Russia","US","Belize","Mexico"),
+                   start=c(1994,1992,2000,1990),
+                   end=c(1998,1995,2002,2003),
+                   eventA=c(1,0,1,0),
+                   measureA=c(56.89,72.90,81.32,34.89))
+data
+```
+
+Using the "to" and "from" dates, we can expand the time variable along a sequence. That said, the `seq()` function can only hand a value with a length of 1, meaning that it cannot simultaneously process a vector of numbers. We get around this by running a loop.
+
+```{r}
+out <- c() # Create a container
+for(i in 1:nrow(data)){
+  data_range <- seq(from=data$start[i],to=data$end[i],by=1) 
+  dd <- data.frame(year=data_range)
+  vars = data[i,c("country","eventA","measureA")] # The other vars
+  rownames(vars) <- NULL
+  data_out <- data.frame(dd,vars)
+  out <- rbind(out,data_out)
+}
+out
+```
+
+**Contracting** data back down is straightforward. We've already covered this with the `summarise` function from `dplyr`.
+```{r}
+out %>% group_by(country) %>% 
+  summarise(.,start=min(year),end=max(year),eventA=max(eventA),measureA=max(measureA))
+```
+
+## Dealing with Wide Data
+Though less of an issue in political science than other social sciences, sometimes we need a way to deal with "wide data". This is most often an issue when dealing with any `World Bank` data, as it often comes in a format where the years are printed as individual data. This is in contrast to the "long data" that we are accustomed to where we just have country-years. 
+
+```{r}
+data <- data.frame(country=c("A","B","C","D","E"),
+                   matrix(rnorm(50,6,10),nrow=5,ncol=10))
+colnames(data)[2:11] <- 2000:2009
+data
+```
+
+The main way to "reshape" the data is to use a loop or the package `rshape2`.
+
+(1) using a **loop**
+```{r}
+out <- c() # create a container
+for( country in 1:nrow(data)){
+  x <- t(data[country,-1]) %>% as.data.frame(.)
+  colnames(x) <- "indicator"
+  x$year <- rownames(x)
+  rownames(x) <- NULL
+  x$country <- data[country,1]
+  the_goods <- x[,c("country","year","indicator")]
+  out <- rbind(out,the_goods)
+}
+out
+```
+
+Nice! But wow that was a lot of code... This is where the `reshape2` package becomes really useful.
+
+(2) `melt()` in the `reshape2` package: Here we are melting the data down from something that was wide to something that is long, and we are doing so by a specific ID (which in this case is the country name).
+
+```{r,error=F,message=F,comment=F}
+require(reshape2) # load the package
+
+data2 <- melt(data,id="country")
+colnames(data2) <- c("country","year","indicator")
+data2 
+```
+
+Way easier! And just one line...
+

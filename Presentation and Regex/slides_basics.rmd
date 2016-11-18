@@ -1,0 +1,33 @@
+---
+title: "Making Great Slides with R Code"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Headers Set New slides
+
+But the same markdown rules apply. 
+
+- Bullet 1
+- $\beta + \alpha$
+- `r exp((4 + 6)/10)`
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
+## Beamer (LaTex) or HTML?
+
+If you prefer LaTex slides, just change the preamble to `beamer_presentation` instead of `ioslides_presentation`. It's that easy. 
+
