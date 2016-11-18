@@ -1,9 +1,10 @@
-# Basics of R Programing 
-# Political Methodology 
-# Department of Government and Politics 
-# University of Maryland, College Park
+# R Programing Workshops
+**Political Methodology** 
+**Department of Government and Politics**
+**University of Maryland, College Park**
+_Fall 2016_
 
-The following provides code for a series of political methodology workshops on using `R` which took place in the Fall 2016. The workshops focused on:
+The following provides code for a series of political methodology workshops on using `R` which took place in the Fall 2016 at the University of Maryland, College Park. The workshops focused on:
  
  - `R` Basics 
  - Data Management
