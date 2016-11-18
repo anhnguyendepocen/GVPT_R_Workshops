@@ -70,6 +70,7 @@ The real point of R markdown is to embed your R code in your working script. Her
 - mac: `alt + command + i`
 - windows: `alt + control + i`
 
+
 In the code chunk, we can do all things R. 
 ```{r}
 x = rnorm(100,.5,3)

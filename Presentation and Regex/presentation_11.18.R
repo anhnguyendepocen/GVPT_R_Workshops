@@ -32,7 +32,7 @@
       # See "http://zeligproject.org/" # For documentation and pitch.
 
       
-    # install.packages("Zelig")
+    install.packages("Zelig")
     require(Zelig)
       
       # Like last time, we will simulate the data generating process for the
@@ -46,6 +46,8 @@
               e <- rnorm(100,0,1) # assumption-following error
               y <-  1 + 2*x + e # y is a linear function of x + error
               D1 = data.frame(y,x)
+              
+              head(D1)
         
         model = zelig(y ~ x, data = D1, model = "ls")
         summary(model)
@@ -61,10 +63,12 @@
               pr = exp(z)/(exp(z) + 1) # Logit-Link
               y <- rbinom(length(pr),1,pr) # Fit to a binomial distribution
               D2 = data.frame(y,x1,x2)
-        
+        head(D2)
         
         zelig(y ~ x1 + x2, data = D2, model = "ls") # LPM
         model2 = zelig(y ~ x1 + x2, data = D2, model = "logit") # ML
+        summary(model2)
+        
         
         set1 = setx(model2,x2=0:3) # Easily set values of interest
         sim1 = sim(model2,set1) # And simulate confidence intervals
@@ -84,6 +88,7 @@
         
                 # !!!DETOUR!!!
                   # Test: Hanmer/Kalkan Approach (how does it compare?)
+                  # install.packages("mvtnorm")
                   require(mvtnorm) 
                   mod = glm(y ~ x1 + x2, data = D2,family=binomial(link="logit"))
                   manipulate <- 0:3
@@ -116,7 +121,8 @@
             y <- rpois(100,lambda)
             count = data.frame(y,x)
                   
-      zelig(y~x,data=count,model="poisson")
+      model = zelig(y~x,data=count,model="poisson")
+      summary(model)
       zelig(y~x,data=count,model="negbin")
       # Same process thereafter setx() and sim() 
      
@@ -136,12 +142,13 @@
     # it difficult to extract any functionality out. I imagine this is so you 
     # have to stay and play with their suite of code, but this can be an issue.
     
+str(model)
 
       
   # *** Hierarchical Models ***
       
-      # install.packages("lme4")
-      # install.packages("arm")
+      install.packages("lme4")
+      install.packages("arm")
       require(lme4)
       require(arm)
       
@@ -149,6 +156,7 @@
       df = sleepstudy
       
       plot(df$Days,df$Reaction,pch=16)
+      
       
       h.model <- lmer(Reaction ~ Days + (1 + Days | Subject), df)
 
@@ -287,6 +295,7 @@
       grep(pattern = "New",countries) # provides location in a vector
             
             # E.g. 
+            countries[1]
             countries[grep(pattern = "New",countries)]
             
       grepl(pattern = "New",countries) # Provides a logical vector
@@ -468,7 +477,7 @@
       countries = c("Democratic Republic of Congo","DR Congo","Congo","Zaire")
       
       countries
-      countrycode(countries,"country.name","country.name") # Standardize Country Names
+      countrycode(countries,origin = "country.name",destination = "country.name") # Standardize Country Names
       countrycode(countries,"country.name","cowc") # Cow three letter code
       countrycode(countries,"country.name","cown") # Cow numerical code
       countrycode(countries,"country.name","wb") # World Bank code 
