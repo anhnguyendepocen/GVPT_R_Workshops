@@ -1,53 +1,9 @@
 R Basics
 ======================================================== 
-author: Eric Dunford 
-date: GVPT Political Methodology R Workshops
-font-import: http://fonts.googleapis.com/css?family=Garamond
-font-family: 'Garamond'
-autosize: true</code>
+Eric Dunford  -- GVPT Political Methodology R Workshops
 
 October 7, 2016
 
-<style>
-
-/* Altering the Title Slides */
-.reveal body {
-  background: #EDE0CF;
-}
-
-/* slide titles */
-.reveal h3 { 
-  font-size: 60px;
-  color: steelblue;
-}
-
-/* subheader titles */
-.reveal h2 { 
-  font-size: 100px;
-}
-
-/* starter-section */
-.starter-section .reveal .state-background {
-  background: #A3A5AD;
-} 
-.starter-section .reveal h3 {
-    font-size: 100px;
-    color: white;
-}
-
-/* Special Slide Type */
-.exclaim .reveal .state-background {
-  background: #ff8080;
-} 
-.exclaim .reveal h3 {
-  font-size: 60px;
-  color: black;
-}
-.exclaim .reveal p {
-  color: white;
-}
-
-</style>
 
 Overview
 ========================================================
@@ -62,7 +18,6 @@ All code and scripts are imbedded in the slides, which can be accessed via: http
 
 R in a Nut Shell
 ========================================================
-incremental: true
 `R` is a statistical and graphical programming language that is based off a much older language called `S`. It's source code is written in C, Fortran, and R. And it's completely **free** under a [GNU General Public License](https://en.wikipedia.org/wiki/GNU_General_Public_License0).
 
 ### What this means for us:
@@ -70,13 +25,10 @@ incremental: true
 - **Active Community**: if you can think it, there is likely a package out there that does it.
 - **Powerful and Adaptive**: build an estimator from scratch, scrape a web-site, automate the coding of a dataset. All is within one's reach. 
 
-Objects
-=======================================================
-type: sub-section
 
 Objects
 =======================================================
-incremental:true
+
 R uses a specific set of rules to goven how it looks up values in the environment. 
 
 We manage data by assigning it a name, and referencing that name when we need to use the information again. 
